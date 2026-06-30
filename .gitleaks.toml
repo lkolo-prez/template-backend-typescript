@@ -1,0 +1,29 @@
+# gitleaks configuration. Extends the bundled default rules and adds repo-specific
+# allowlisting so example/dummy values do not trip the scanner.
+# Docs: https://github.com/gitleaks/gitleaks
+
+title = "template-backend-typescript gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Global allowlist for fixtures, examples and lockfiles"
+paths = [
+  '''(^|/)\.env\.example$''',
+  '''(^|/)pnpm-lock\.yaml$''',
+  '''(^|/)test/.*''',
+  '''(^|/)docs/.*''',
+  '''(^|/)openapi\.json$''',
+]
+regexes = [
+  # Obvious placeholders used throughout docs/examples.
+  '''(?i)(example|dummy|placeholder|changeme|your-[a-z-]+|xxxx+)''',
+]
+
+# Example custom rule: catch hard-coded JWTs that real code must never contain.
+[[rules]]
+id = "jwt-token"
+description = "JSON Web Token"
+regex = '''eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}'''
+tags = ["jwt", "token"]

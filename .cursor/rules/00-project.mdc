@@ -1,0 +1,43 @@
+---
+description: Project-wide rules for the Fastify TypeScript microservice template.
+globs:
+  - "**/*.ts"
+alwaysApply: true
+---
+
+# Project rules — template-backend-typescript
+
+You are working in a production-grade Fastify v5 microservice (Node 22 LTS,
+TypeScript strict, ESM, pnpm).
+
+## Hard rules
+
+- Use **pnpm** only. Validation commands: `pnpm lint`, `pnpm typecheck`,
+  `pnpm test:cov` — all must pass.
+- ESM imports use `.js` extensions (NodeNext): `import { config } from "./config.js"`.
+- No `any`. Biome flags it as an error. Use `unknown` + Zod narrowing.
+- `noUncheckedIndexedAccess` is on; guard every array/record index access.
+
+## Patterns
+
+- **Routes** (`src/routes/**`): declare Zod `body`/`querystring`/`params`/
+  `response` schemas. The schema is the contract and feeds OpenAPI 3.1 at `/docs`.
+- **Errors**: throw `AppError`/`NotFoundError`/`ConflictError` from
+  `src/errors.ts`; responses are RFC 9457 `application/problem+json`.
+- **Config**: environment only, via `src/config.ts` (Zod). New setting => add to
+  the schema and to `.env.example`.
+- **Plugins/middleware**: cross-cutting concerns go in `src/plugins/` and
+  `src/middlewares/`, wired in `src/app.ts`. Keep `buildApp()` listen-free.
+- **Tests**: Vitest. Integration via `app.inject()` and `buildTestApp()`. Keep
+  coverage >= 80%.
+
+## Security
+
+- No secrets/credentials in code. Cloud auth = OIDC; signing = keyless cosign.
+- Do not unpin GitHub Actions (SHA-pinned) or container digests.
+- Do not weaken `security-headers` or `rate-limit` plugins.
+
+## Commits
+
+Conventional Commits. Commits must be signed (verified). Releases are automated
+via release-please.

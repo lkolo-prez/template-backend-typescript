@@ -1,0 +1,94 @@
+# https://taskfile.dev — `task --list` to see all targets.
+version: "3"
+
+vars:
+  IMAGE: ghcr.io/aircloud/template-backend-typescript
+  PNPM: pnpm
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+    silent: true
+
+  setup:
+    desc: Install toolchain and dependencies, set up git hooks
+    cmds:
+      - corepack enable
+      - "{{.PNPM}} install --frozen-lockfile"
+      - "{{.PNPM}} run prepare"
+
+  lint:
+    desc: Lint with Biome (no writes)
+    cmds:
+      - "{{.PNPM}} run lint"
+
+  format:
+    desc: Auto-format the codebase
+    cmds:
+      - "{{.PNPM}} run format"
+
+  typecheck:
+    desc: Type-check with the TypeScript compiler
+    cmds:
+      - "{{.PNPM}} run typecheck"
+
+  test:
+    desc: Run the full test suite
+    cmds:
+      - "{{.PNPM}} run test"
+
+  test:cov:
+    desc: Run tests with coverage gate (>= 80%)
+    cmds:
+      - "{{.PNPM}} run test:cov"
+
+  build:
+    desc: Build the production bundle with tsup
+    cmds:
+      - "{{.PNPM}} run build"
+
+  run:
+    desc: Run the built server
+    deps: [build]
+    cmds:
+      - "{{.PNPM}} run start"
+
+  dev:
+    desc: Run the server in watch mode
+    cmds:
+      - "{{.PNPM}} run dev"
+
+  openapi:
+    desc: Generate openapi.json from the Zod schemas
+    cmds:
+      - "{{.PNPM}} run openapi"
+
+  sbom:
+    desc: Generate a CycloneDX SBOM with syft
+    cmds:
+      - syft scan dir:. --output cyclonedx-json=sbom.cdx.json
+
+  security:
+    desc: Run local security scans (Trivy fs + gitleaks + audit)
+    cmds:
+      - "{{.PNPM}} audit --audit-level=high || true"
+      - gitleaks detect --no-banner --redact -v || true
+      - trivy fs --scanners vuln,secret,misconfig --severity HIGH,CRITICAL --exit-code 0 .
+
+  docker:build:
+    desc: Build the container image locally
+    cmds:
+      - docker build -t {{.IMAGE}}:local .
+
+  docker:scan:
+    desc: Scan the locally built image with Trivy
+    deps: [docker:build]
+    cmds:
+      - trivy image --severity HIGH,CRITICAL {{.IMAGE}}:local
+
+  clean:
+    desc: Remove build artifacts and caches
+    cmds:
+      - rm -rf dist coverage node_modules/.cache *.tsbuildinfo openapi.json sbom.cdx.json

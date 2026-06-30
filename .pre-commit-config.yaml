@@ -1,0 +1,45 @@
+# pre-commit hooks. Install with: pipx install pre-commit && pre-commit install
+# Update pinned revs with: pre-commit autoupdate
+# Docs: https://pre-commit.com
+minimum_pre_commit_version: "3.7.0"
+default_install_hook_types: [pre-commit, commit-msg]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b # v5.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-json
+      - id: check-added-large-files
+        args: [--maxkb=512]
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: detect-private-key
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: 77c3c6a34b2577d71083442326c60b8fd58926ec # v8.21.2
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/biomejs/pre-commit
+    rev: c4c8c5cd2fc1e2d440a3ec9f1e1ee2b3d92cda93 # v0.6.1
+    hooks:
+      - id: biome-check
+        additional_dependencies: ["@biomejs/biome@1.9.4"]
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: 38ddf37c130773a8d97e6c0c10b9fafad7f4e0bd # v4.0.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: []
+
+  - repo: https://github.com/hadolint/hadolint
+    rev: c3dc18df7a501f02a560a2cc7ba3c69a85ca01d3 # v2.13.1-beta
+    hooks:
+      - id: hadolint-docker
+        args: [--config, .hadolint.yaml]

@@ -1,0 +1,59 @@
+# Dependabot is kept as a backstop / security-update channel. Day-to-day version
+# bumps are driven by Renovate (renovate.json); Dependabot's grouped ecosystem
+# PRs are scoped to weekly so the two do not fight. GitHub's Dependabot security
+# updates (separate, always-on) remain the safety net regardless of schedule.
+version: 2
+updates:
+  # ---- npm (pnpm) ----------------------------------------------------------
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "05:00"
+      timezone: Europe/Warsaw
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    groups:
+      otel:
+        patterns:
+          - "@opentelemetry/*"
+      dev-minor-patch:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+
+  # ---- GitHub Actions ------------------------------------------------------
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "05:00"
+      timezone: Europe/Warsaw
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - ci
+    commit-message:
+      prefix: "ci(deps)"
+
+  # ---- Dockerfile ----------------------------------------------------------
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "05:00"
+      timezone: Europe/Warsaw
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - docker
+    commit-message:
+      prefix: "chore(docker)"

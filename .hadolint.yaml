@@ -1,0 +1,12 @@
+# hadolint configuration — https://github.com/hadolint/hadolint
+failure-threshold: warning
+
+trustedRegistries:
+  - docker.io
+  - gcr.io
+  - ghcr.io
+
+ignored:
+  # DL3008/DL3018: we do not install OS packages in the final distroless stage.
+  # Pinning base images by digest is enforced via Renovate in CI, not hadolint.
+  - DL3007

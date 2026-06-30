@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/aircloud/template-backend-typescript/security/advisories/new
+    about: Report security issues privately via GitHub Security Advisories. Do not open a public issue.
+  - name: Questions & discussions
+    url: https://github.com/aircloud/template-backend-typescript/discussions
+    about: Ask questions, share ideas, and discuss usage in GitHub Discussions.
+  - name: AirCloud engineering handbook
+    url: https://aircloud.com.pl/engineering
+    about: Internal conventions, on-call, and platform docs.

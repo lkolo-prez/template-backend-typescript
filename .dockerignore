@@ -1,0 +1,39 @@
+# Dependencies (reinstalled inside the image)
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+coverage
+*.tsbuildinfo
+
+# VCS & CI
+.git
+.github
+.gitignore
+.gitattributes
+
+# Editor / tooling
+.vscode
+.cursor
+.devcontainer
+.husky
+.idea
+
+# Tests & docs (not needed at runtime)
+test
+docs
+*.md
+
+# Local env & secrets
+.env
+.env.*
+!.env.example
+
+# Misc artifacts
+sbom.cdx.json
+openapi.json
+Dockerfile
+.dockerignore
+Taskfile.yml
+.pre-commit-config.yaml

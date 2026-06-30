@@ -1,0 +1,23 @@
+# CODEOWNERS — required reviewers per path.
+# https://docs.github.com/en/repositories/managing-your-repositories-permissions-and-settings/customizing-your-repository/about-code-owners
+# Order matters: the LAST matching pattern wins. These teams must exist in the
+# `aircloud` org. Reviews from a CODEOWNER are required by the branch ruleset.
+
+# Default owners for everything in the repo.
+*                           @aircloud/backend-platform
+
+# CI/CD, security workflows, and supply-chain config.
+/.github/                   @aircloud/platform-security @aircloud/backend-platform
+/.github/workflows/         @aircloud/platform-security
+/Dockerfile                 @aircloud/platform-security @aircloud/backend-platform
+/.gitleaks.toml             @aircloud/platform-security
+/.pre-commit-config.yaml    @aircloud/platform-security
+/renovate.json              @aircloud/platform-security
+
+# Application source and tests.
+/src/                       @aircloud/backend-platform
+/test/                      @aircloud/backend-platform
+
+# Documentation.
+/docs/                      @aircloud/backend-platform @aircloud/tech-writers
+*.md                        @aircloud/tech-writers

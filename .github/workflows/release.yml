@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+# Least privilege at the top; the release job elevates only what it needs.
+permissions:
+  contents: read
+
+concurrency:
+  # Never run two releases at once; do NOT cancel an in-flight release.
+  group: release-${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # release-please reads Conventional Commits since the last tag, maintains a
+  # release PR, and on merge of that PR creates the SemVer tag + GitHub Release.
+  # The pushed tag (v*.*.*) then triggers container.yml to build/sign/publish.
+  # ---------------------------------------------------------------------------
+  release-please:
+    name: release-please
+    runs-on: ubuntu-24.04
+    permissions:
+      # Create/update the release PR, tags and the GitHub Release.
+      contents: write
+      # Maintain the release pull request.
+      pull-requests: write
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
+        with:
+          egress-policy: audit
+
+      - name: Run release-please
+        uses: googleapis/release-please-action@7987652d64b4581673a76e33ad5e98e3dd56832f # v4.1.3
+        with:
+          # release-type drives changelog sections + version-file bumping.
+          release-type: node
+          # A dedicated token lets the created release PR trigger other
+          # workflows (the default GITHUB_TOKEN does not). Falls back to the
+          # default token when the org PAT/app token is not configured.
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}

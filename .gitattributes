@@ -1,0 +1,24 @@
+# Normalise line endings to LF on checkin.
+* text=auto eol=lf
+
+# Explicit text types
+*.ts    text eol=lf
+*.js    text eol=lf
+*.json  text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.md    text eol=lf
+*.sh    text eol=lf
+Dockerfile text eol=lf
+
+# Binary types — never normalise
+*.png   binary
+*.jpg   binary
+*.ico   binary
+*.woff2 binary
+
+# Lockfiles: keep diffs but collapse in review UIs
+pnpm-lock.yaml -diff linguist-generated=true
+
+# Keep the shell scripts executable
+*.sh text eol=lf

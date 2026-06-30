@@ -1,0 +1,224 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Least privilege at the top; jobs elevate only what they need.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Lint + format check. Separate job so it shows as its own required check.
+  # ---------------------------------------------------------------------------
+  lint:
+    name: lint
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            codeload.github.com:443
+            objects.githubusercontent.com:443
+            registry.npmjs.org:443
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Biome lint
+        run: pnpm run lint
+
+      - name: Biome format check
+        run: pnpm run format:check
+
+  # ---------------------------------------------------------------------------
+  # Typecheck.
+  # ---------------------------------------------------------------------------
+  typecheck:
+    name: typecheck
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            codeload.github.com:443
+            objects.githubusercontent.com:443
+            registry.npmjs.org:443
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+  # ---------------------------------------------------------------------------
+  # Tests + coverage gate (>= 80%, enforced by vitest.config.ts thresholds).
+  # ---------------------------------------------------------------------------
+  test:
+    name: test
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            codeload.github.com:443
+            objects.githubusercontent.com:443
+            registry.npmjs.org:443
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test with coverage
+        run: pnpm run test:cov
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Build the bundle + generate the OpenAPI document.
+  # ---------------------------------------------------------------------------
+  build:
+    name: build
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@0080882f6c36860b6ba35c610c98ce87d4e2f26f # v2.10.2
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            codeload.github.com:443
+            objects.githubusercontent.com:443
+            registry.npmjs.org:443
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Generate OpenAPI document
+        run: pnpm run openapi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: dist
+          path: |
+            dist/
+            openapi.json
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Org reusable jobs: CodeQL + aggregated security scanning.
+  #
+  # OPTIONAL / OPT-IN. These delegate to centrally-maintained reusable workflows
+  # in aircloud/.github. They are functionally redundant with the standalone
+  # `codeql.yml`, `security.yml` and `scorecard.yml` shipped in this template,
+  # which already provide CodeQL, gitleaks, Trivy, Semgrep, dependency-review and
+  # Scorecard with zero extra wiring. Keep ONE of the two approaches:
+  #   - keep the standalone workflows (default) and delete these two jobs, OR
+  #   - delete the standalone workflows and rely on the org reusable ones below.
+  # Running both just doubles the checks. The placeholder SHA below does not yet
+  # resolve, so these jobs will fail until the org repo + tag exist — hence they
+  # are gated off by default via the `if:` guard.
+  # ---------------------------------------------------------------------------
+  codeql:
+    name: CodeQL (org reusable)
+    # Disabled by default; flip to `true` once aircloud/.github is published and
+    # you choose the reusable-workflow approach over the standalone files.
+    if: false
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    uses: aircloud/.github/.github/workflows/reusable-codeql.yml@7c8f8b3a3a3d3e2f1a0b9c8d7e6f5a4b3c2d1e0f # replace with released SHA of aircloud/.github (v1.6.0)
+    with:
+      languages: "javascript-typescript"
+
+  security:
+    name: security (org reusable)
+    if: false
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+      pull-requests: read
+    uses: aircloud/.github/.github/workflows/reusable-security.yml@7c8f8b3a3a3d3e2f1a0b9c8d7e6f5a4b3c2d1e0f # replace with released SHA of aircloud/.github (v1.6.0)
+    with:
+      trivy-scan-type: "fs"
+      enable-gitleaks: true
+      enable-dependency-review: ${{ github.event_name == 'pull_request' }}

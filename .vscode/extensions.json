@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    "biomejs.biome",
+    "ms-azuretools.vscode-docker",
+    "redhat.vscode-yaml",
+    "github.vscode-github-actions",
+    "vitest.explorer",
+    "editorconfig.editorconfig",
+    "github.copilot",
+    "anthropic.claude-code",
+    "ms-vscode-remote.remote-containers",
+    "tamasfe.even-better-toml"
+  ],
+  "unwantedRecommendations": ["esbenp.prettier-vscode", "dbaeumer.vscode-eslint"]
+}
