@@ -4,7 +4,7 @@
 # Stage 1: dependencies (full, including dev) for building.
 # Pinned by digest in CI via Renovate; tag kept here for readability.
 # ---------------------------------------------------------------------------
-FROM node:22.13.1-bookworm-slim AS deps
+FROM node:26.4.0-bookworm-slim AS deps
 ENV PNPM_HOME=/pnpm
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
@@ -16,7 +16,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 # ---------------------------------------------------------------------------
 # Stage 2: build the application bundle with tsup.
 # ---------------------------------------------------------------------------
-FROM node:22.13.1-bookworm-slim AS build
+FROM node:26.4.0-bookworm-slim AS build
 ENV PNPM_HOME=/pnpm
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
@@ -28,7 +28,7 @@ RUN pnpm run build
 # ---------------------------------------------------------------------------
 # Stage 3: production dependencies only (prune dev deps).
 # ---------------------------------------------------------------------------
-FROM node:22.13.1-bookworm-slim AS prod-deps
+FROM node:26.4.0-bookworm-slim AS prod-deps
 ENV PNPM_HOME=/pnpm
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
