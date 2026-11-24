@@ -42,7 +42,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 # ---------------------------------------------------------------------------
 # Stage 4: minimal distroless runtime. Non-root, read-only rootfs friendly.
 # ---------------------------------------------------------------------------
-FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runtime
+FROM gcr.io/distroless/nodejs22-debian13:nonroot AS runtime
 
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \

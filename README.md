@@ -33,7 +33,7 @@ with security, observability, testing and CI/CD wired up from day one.
 | Testing        | Vitest (unit + integration via `app.inject()`), 80% gate    |
 | Lint/format    | Biome                                                        |
 | Build          | tsup                                                         |
-| Container      | Multi-stage -> `gcr.io/distroless/nodejs22-debian12:nonroot`|
+| Container      | Multi-stage -> `gcr.io/distroless/nodejs22-debian13:nonroot`|
 
 ## Usage
 
