@@ -17,7 +17,8 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: aircloud/template-backend-typescript
+  # Image lives next to the repository (GHCR needs a lowercase name).
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   # ---------------------------------------------------------------------------
