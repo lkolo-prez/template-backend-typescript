@@ -65,7 +65,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Trivy filesystem scan (SARIF)
-        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947b394f2dd8c87dbb0 # v0.29.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: fs
           scanners: vuln,secret,misconfig
@@ -88,7 +88,7 @@ jobs:
       # Second pass that actually fails the job on findings (the SARIF upload
       # above is non-blocking by design so the dashboard always gets data).
       - name: Trivy filesystem scan (gate)
-        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947b394f2dd8c87dbb0 # v0.29.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: fs
           scanners: vuln,secret,misconfig
@@ -118,19 +118,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
+      # semgrep/semgrep-action is deprecated and its bundled engine cannot parse
+      # current registry rules (severity MEDIUM). Run the CLI directly so the
+      # SARIF file is always produced; findings go to code scanning.
+      - name: Install Semgrep
+        run: pipx install semgrep==1.186.0
+
       - name: Run Semgrep
-        uses: semgrep/semgrep-action@713efdd345f3035192eaa63f56867b88e63e4e5d # v1.106.0
-        with:
-          config: >-
-            p/default
-            p/typescript
-            p/nodejs
-            p/owasp-top-ten
-            p/secrets
-          generateSarif: "1"
+        env:
+          SEMGREP_SEND_METRICS: "off"
+        run: >-
+          semgrep scan
+          --config p/default
+          --config p/typescript
+          --config p/nodejs
+          --config p/owasp-top-ten
+          --config p/secrets
+          --sarif --output semgrep.sarif
 
       - name: Upload Semgrep SARIF
-        if: always()
+        if: always() && hashFiles('semgrep.sarif') != ''
         uses: github/codeql-action/upload-sarif@f09c1c0a94de965c15400f5634aa42fac8fb8f88 # v3.27.5
         with:
           sarif_file: semgrep.sarif

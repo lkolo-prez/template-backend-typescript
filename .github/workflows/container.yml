@@ -79,7 +79,7 @@ jobs:
 
       - name: Build and push by digest
         id: build
-        uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcd730101868f # v6.9.0
+        uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75 # v6.9.0
         with:
           context: .
           file: ./Dockerfile
@@ -128,7 +128,7 @@ jobs:
 
       - name: Attest SBOM
         if: github.event_name != 'pull_request'
-        uses: actions/attest-sbom@bcf6bb9b2fbe11e9a8061a7e3e082edc04c98870 # v1.4.1
+        uses: actions/attest-sbom@5026d3663739160db546203eeaffa6aa1c51a4d6 # v1.4.1
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.build.outputs.digest }}
@@ -172,7 +172,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Trivy image scan (SARIF)
-        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947b394f2dd8c87dbb0 # v0.29.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: ${{ needs.build.outputs.image }}@${{ needs.build.outputs.digest }}
           format: sarif
@@ -191,7 +191,7 @@ jobs:
           category: trivy-image
 
       - name: Trivy image scan (gate)
-        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947b394f2dd8c87dbb0 # v0.29.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: ${{ needs.build.outputs.image }}@${{ needs.build.outputs.digest }}
           format: table

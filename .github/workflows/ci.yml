@@ -193,32 +193,34 @@ jobs:
   #   - keep the standalone workflows (default) and delete these two jobs, OR
   #   - delete the standalone workflows and rely on the org reusable ones below.
   # Running both just doubles the checks. The placeholder SHA below does not yet
-  # resolve, so these jobs will fail until the org repo + tag exist — hence they
-  # are gated off by default via the `if:` guard.
+  # resolve, so these jobs will fail until the org repo + tag exist. GitHub
+  # resolves `uses:` of reusable workflows even when `if: false`, so an
+  # unresolvable ref invalidates the whole workflow file: the jobs are kept
+  # below as comments. Uncomment them once the org repo and tag exist.
   # ---------------------------------------------------------------------------
-  codeql:
-    name: CodeQL (org reusable)
-    # Disabled by default; flip to `true` once aircloud/.github is published and
-    # you choose the reusable-workflow approach over the standalone files.
-    if: false
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
-    uses: aircloud/.github/.github/workflows/reusable-codeql.yml@7c8f8b3a3a3d3e2f1a0b9c8d7e6f5a4b3c2d1e0f # replace with released SHA of aircloud/.github (v1.6.0)
-    with:
-      languages: "javascript-typescript"
+  # codeql:
+  #   name: CodeQL (org reusable)
+  #   # Disabled by default; flip to `true` once aircloud/.github is published and
+  #   # you choose the reusable-workflow approach over the standalone files.
+  #   if: false
+  #   permissions:
+  #     contents: read
+  #     security-events: write
+  #     actions: read
+  #   uses: aircloud/.github/.github/workflows/reusable-codeql.yml@7c8f8b3a3a3d3e2f1a0b9c8d7e6f5a4b3c2d1e0f # replace with released SHA of aircloud/.github (v1.6.0)
+  #   with:
+  #     languages: "javascript-typescript"
 
-  security:
-    name: security (org reusable)
-    if: false
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
-      pull-requests: read
-    uses: aircloud/.github/.github/workflows/reusable-security.yml@7c8f8b3a3a3d3e2f1a0b9c8d7e6f5a4b3c2d1e0f # replace with released SHA of aircloud/.github (v1.6.0)
-    with:
-      trivy-scan-type: "fs"
-      enable-gitleaks: true
-      enable-dependency-review: ${{ github.event_name == 'pull_request' }}
+  # security:
+  #   name: security (org reusable)
+  #   if: false
+  #   permissions:
+  #     contents: read
+  #     security-events: write
+  #     actions: read
+  #     pull-requests: read
+  #   uses: aircloud/.github/.github/workflows/reusable-security.yml@7c8f8b3a3a3d3e2f1a0b9c8d7e6f5a4b3c2d1e0f # replace with released SHA of aircloud/.github (v1.6.0)
+  #   with:
+  #     trivy-scan-type: "fs"
+  #     enable-gitleaks: true
+  #     enable-dependency-review: ${{ github.event_name == 'pull_request' }}
