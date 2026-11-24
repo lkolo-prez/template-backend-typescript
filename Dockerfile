@@ -4,7 +4,7 @@
 # Stage 1: dependencies (full, including dev) for building.
 # Pinned by digest in CI via Renovate; tag kept here for readability.
 # ---------------------------------------------------------------------------
-FROM node:22.13.1-bookworm-slim AS deps
+FROM node:22.23.5-bookworm-slim AS deps
 ENV PNPM_HOME=/pnpm
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
@@ -16,7 +16,7 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
 # ---------------------------------------------------------------------------
 # Stage 2: build the application bundle with tsup.
 # ---------------------------------------------------------------------------
-FROM node:22.13.1-bookworm-slim AS build
+FROM node:22.23.5-bookworm-slim AS build
 ENV PNPM_HOME=/pnpm
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
@@ -28,14 +28,16 @@ RUN pnpm run build
 # ---------------------------------------------------------------------------
 # Stage 3: production dependencies only (prune dev deps).
 # ---------------------------------------------------------------------------
-FROM node:22.13.1-bookworm-slim AS prod-deps
+FROM node:22.23.5-bookworm-slim AS prod-deps
 ENV PNPM_HOME=/pnpm
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
+# --ignore-scripts: the root `prepare` hook (husky) needs dev deps, and runtime
+# deps must not run install scripts in the production image.
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    pnpm install --frozen-lockfile --prod
+    pnpm install --frozen-lockfile --prod --ignore-scripts
 
 # ---------------------------------------------------------------------------
 # Stage 4: minimal distroless runtime. Non-root, read-only rootfs friendly.
@@ -57,9 +59,11 @@ COPY --chown=nonroot:nonroot package.json ./
 EXPOSE 3000
 
 # The distroless nodejs image's entrypoint is "node"; we pass the script only.
-# Healthcheck uses node's fetch (Node 22) to hit the liveness probe.
+# Healthcheck uses node's fetch (Node 22) to hit the liveness probe. HEALTHCHECK
+# does not go through ENTRYPOINT and distroless has no shell, so call node
+# directly in exec form.
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD ["dist/server.js", "--healthcheck"] || exit 1
+  CMD ["/nodejs/bin/node", "dist/server.js", "--healthcheck"]
 
 USER nonroot:nonroot
 
