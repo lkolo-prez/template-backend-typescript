@@ -1,12 +1,11 @@
-import type { FastifyInstance } from "fastify";
-import { buildApp } from "../src/app.js";
+import { type App, buildApp } from "../src/app.js";
 import { loadConfig } from "../src/config.js";
 
 /**
  * Builds an app instance wired for tests: deterministic config, no telemetry
  * export, quiet logs. Callers should `await app.close()` in afterAll/afterEach.
  */
-export async function buildTestApp(): Promise<FastifyInstance> {
+export async function buildTestApp(): Promise<App> {
   const config = loadConfig({
     NODE_ENV: "test",
     LOG_LEVEL: "silent",

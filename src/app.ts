@@ -1,7 +1,14 @@
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
-import Fastify, { type FastifyInstance } from "fastify";
+import Fastify, {
+  type FastifyBaseLogger,
+  type FastifyInstance,
+  type RawReplyDefaultExpression,
+  type RawRequestDefaultExpression,
+  type RawServerDefault,
+} from "fastify";
 import {
+  jsonSchemaTransform,
   serializerCompiler,
   validatorCompiler,
   type ZodTypeProvider,
@@ -16,6 +23,15 @@ import sensible from "./plugins/sensible.js";
 import { healthRoutes } from "./routes/health.js";
 import { widgetRoutes } from "./routes/v1/widgets.js";
 
+/** The configured Fastify instance type (Zod type provider). */
+export type App = FastifyInstance<
+  RawServerDefault,
+  RawRequestDefaultExpression,
+  RawReplyDefaultExpression,
+  FastifyBaseLogger,
+  ZodTypeProvider
+>;
+
 export interface BuildAppOptions {
   config: AppConfig;
 }
@@ -25,11 +41,12 @@ export interface BuildAppOptions {
  * Keeping `buildApp` side-effect free (no `.listen`) is what makes integration
  * testing with `app.inject()` fast and deterministic.
  */
-export async function buildApp(opts: BuildAppOptions): Promise<FastifyInstance> {
+export async function buildApp(opts: BuildAppOptions): Promise<App> {
   const { config } = opts;
 
   const app = Fastify({
-    loggerInstance: createLogger(config),
+    // Pino satisfies FastifyBaseLogger; widen so the instance type stays portable.
+    loggerInstance: createLogger(config) as FastifyBaseLogger,
     genReqId: () => crypto.randomUUID(),
     requestIdHeader: "x-request-id",
     disableRequestLogging: false,
@@ -66,10 +83,8 @@ export async function buildApp(opts: BuildAppOptions): Promise<FastifyInstance> 
         { name: "widgets", description: "Example CRUD resource." },
       ],
     },
-    transform: ({ schema, url }) => {
-      // fastify-type-provider-zod supplies the JSON Schema conversion.
-      return { schema, url };
-    },
+    // fastify-type-provider-zod converts the Zod route schemas to JSON Schema.
+    transform: jsonSchemaTransform,
   });
 
   await app.register(swaggerUi, {

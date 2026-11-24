@@ -14,8 +14,7 @@ const requestIdPlugin: FastifyPluginAsync = async (app) => {
   app.addHook("onRequest", async (request, reply) => {
     const inbound = request.headers[REQUEST_ID_HEADER];
     const candidate = Array.isArray(inbound) ? inbound[0] : inbound;
-    const id =
-      candidate && /^[\w.-]{1,128}$/.test(candidate) ? candidate : randomUUID();
+    const id = candidate && /^[\w.-]{1,128}$/.test(candidate) ? candidate : randomUUID();
 
     // Fastify request.id is read-only after creation; expose ours explicitly.
     reply.header(REQUEST_ID_HEADER, id);

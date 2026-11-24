@@ -11,14 +11,8 @@ const securityHeadersPlugin: FastifyPluginAsync = async (app) => {
     reply.header("X-Content-Type-Options", "nosniff");
     reply.header("X-Frame-Options", "DENY");
     reply.header("Referrer-Policy", "no-referrer");
-    reply.header(
-      "Strict-Transport-Security",
-      "max-age=63072000; includeSubDomains; preload",
-    );
-    reply.header(
-      "Permissions-Policy",
-      "geolocation=(), microphone=(), camera=()",
-    );
+    reply.header("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+    reply.header("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
     reply.header(
       "Content-Security-Policy",
       "default-src 'none'; frame-ancestors 'none'; base-uri 'none'",

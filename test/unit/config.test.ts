@@ -17,15 +17,11 @@ describe("loadConfig", () => {
   });
 
   it("rejects an out-of-range port", () => {
-    expect(() => loadConfig({ PORT: "70000" })).toThrowError(
-      /Invalid environment configuration/,
-    );
+    expect(() => loadConfig({ PORT: "70000" })).toThrowError(/Invalid environment configuration/);
   });
 
   it("rejects an unknown NODE_ENV", () => {
-    expect(() => loadConfig({ NODE_ENV: "staging" })).toThrowError(
-      /NODE_ENV/,
-    );
+    expect(() => loadConfig({ NODE_ENV: "staging" })).toThrowError(/NODE_ENV/);
   });
 
   it("transforms boolean-ish flags", () => {

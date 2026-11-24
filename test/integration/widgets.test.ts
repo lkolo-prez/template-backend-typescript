@@ -1,9 +1,9 @@
-import type { FastifyInstance } from "fastify";
+import type { App } from "../../src/app.js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { buildTestApp } from "../helpers.js";
 
 describe("widgets CRUD", () => {
-  let app: FastifyInstance;
+  let app: App;
 
   beforeAll(async () => {
     app = await buildTestApp();

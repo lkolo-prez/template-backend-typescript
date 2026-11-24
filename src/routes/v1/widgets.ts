@@ -33,10 +33,9 @@ const CreateWidget = z.object({
   quantity: z.number().int().nonnegative().default(0),
 });
 
-const UpdateWidget = CreateWidget.partial().refine(
-  (v) => Object.keys(v).length > 0,
-  { message: "At least one field must be provided." },
-);
+const UpdateWidget = CreateWidget.partial().refine((v) => Object.keys(v).length > 0, {
+  message: "At least one field must be provided.",
+});
 
 const WidgetParams = z.object({ id: z.string().uuid() });
 
@@ -71,7 +70,11 @@ type Widget = z.infer<typeof Widget>;
 class WidgetRepository {
   private readonly store = new Map<string, Widget>();
 
-  list(filter: { color?: Widget["color"]; limit: number; offset: number }) {
+  list(filter: {
+    color?: Widget["color"] | undefined;
+    limit: number;
+    offset: number;
+  }) {
     let items = [...this.store.values()];
     if (filter.color) items = items.filter((w) => w.color === filter.color);
     items.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
@@ -106,9 +109,14 @@ class WidgetRepository {
   update(id: string, patch: z.infer<typeof UpdateWidget>): Widget {
     const current = this.store.get(id);
     if (!current) throw new NotFoundError(`Widget ${id} not found.`);
+    // Drop keys that are present but undefined so they cannot erase fields
+    // (required with `exactOptionalPropertyTypes`).
+    const changes = Object.fromEntries(
+      Object.entries(patch).filter(([, value]) => value !== undefined),
+    ) as Partial<Widget>;
     const updated: Widget = {
       ...current,
-      ...patch,
+      ...changes,
       updatedAt: new Date().toISOString(),
     };
     this.store.set(id, updated);
@@ -205,7 +213,7 @@ export const widgetRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     async (request, reply) => {
       repo.delete(request.params.id);
-      return reply.status(204).send();
+      return reply.status(204).send(null);
     },
   );
 };

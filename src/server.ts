@@ -10,10 +10,9 @@ import { config } from "./config.js";
  */
 async function runHealthcheck(): Promise<never> {
   try {
-    const res = await fetch(
-      `http://127.0.0.1:${config.PORT}/health/live`,
-      { signal: AbortSignal.timeout(2_500) },
-    );
+    const res = await fetch(`http://127.0.0.1:${config.PORT}/health/live`, {
+      signal: AbortSignal.timeout(2_500),
+    });
     process.exit(res.ok ? 0 : 1);
   } catch {
     process.exit(1);

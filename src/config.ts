@@ -6,18 +6,14 @@ import { z } from "zod";
  * because the module throws before exporting if validation fails.
  */
 const EnvSchema = z.object({
-  NODE_ENV: z
-    .enum(["development", "test", "production"])
-    .default("development"),
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 
   // HTTP server
   HOST: z.string().default("0.0.0.0"),
   PORT: z.coerce.number().int().min(1).max(65_535).default(3000),
 
   // Logging
-  LOG_LEVEL: z
-    .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
-    .default("info"),
+  LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
   LOG_PRETTY: z
     .enum(["true", "false"])
     .default("false")

@@ -3,16 +3,10 @@ import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
 import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-http";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 import { resourceFromAttributes } from "@opentelemetry/resources";
-import {
-  BatchLogRecordProcessor,
-  LoggerProvider,
-} from "@opentelemetry/sdk-logs";
+import { BatchLogRecordProcessor, LoggerProvider } from "@opentelemetry/sdk-logs";
 import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
 import { NodeSDK } from "@opentelemetry/sdk-node";
-import {
-  ATTR_SERVICE_NAME,
-  ATTR_SERVICE_VERSION,
-} from "@opentelemetry/semantic-conventions";
+import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from "@opentelemetry/semantic-conventions";
 import type { AppConfig } from "./config.js";
 
 /**
@@ -38,20 +32,24 @@ export function startTelemetry(config: AppConfig): Telemetry {
     [ATTR_SERVICE_VERSION]: config.SERVICE_VERSION,
   });
 
-  const loggerProvider = new LoggerProvider({ resource });
-  loggerProvider.addLogRecordProcessor(
-    new BatchLogRecordProcessor(
-      new OTLPLogExporter({ url: `${endpoint}/v1/logs` }),
-    ),
-  );
+  const loggerProvider = new LoggerProvider({
+    resource,
+    processors: [
+      new BatchLogRecordProcessor({
+        exporter: new OTLPLogExporter({ url: `${endpoint}/v1/logs` }),
+      }),
+    ],
+  });
 
   const sdk = new NodeSDK({
     resource,
     traceExporter: new OTLPTraceExporter({ url: `${endpoint}/v1/traces` }),
-    metricReader: new PeriodicExportingMetricReader({
-      exporter: new OTLPMetricExporter({ url: `${endpoint}/v1/metrics` }),
-      exportIntervalMillis: 15_000,
-    }),
+    metricReaders: [
+      new PeriodicExportingMetricReader({
+        exporter: new OTLPMetricExporter({ url: `${endpoint}/v1/metrics` }),
+        exportIntervalMillis: 15_000,
+      }),
+    ],
     instrumentations: [
       getNodeAutoInstrumentations({
         // fs instrumentation is noisy and rarely actionable for an HTTP service.

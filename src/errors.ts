@@ -1,4 +1,12 @@
-import type { FastifyInstance } from "fastify";
+import type {
+  FastifyBaseLogger,
+  FastifyError,
+  FastifyInstance,
+  FastifyTypeProvider,
+  RawReplyDefaultExpression,
+  RawRequestDefaultExpression,
+  RawServerDefault,
+} from "fastify";
 import { hasZodFastifySchemaValidationErrors } from "fastify-type-provider-zod";
 
 /**
@@ -64,8 +72,16 @@ export class ConflictError extends AppError {
  * unexpected exceptions into a consistent Problem Details payload, logging the
  * full error server-side while exposing only safe information to the client.
  */
-export function registerErrorHandler(app: FastifyInstance): void {
-  app.setErrorHandler((error, request, reply) => {
+export function registerErrorHandler<TypeProvider extends FastifyTypeProvider>(
+  app: FastifyInstance<
+    RawServerDefault,
+    RawRequestDefaultExpression,
+    RawReplyDefaultExpression,
+    FastifyBaseLogger,
+    TypeProvider
+  >,
+): void {
+  app.setErrorHandler<FastifyError>((error, request, reply) => {
     const requestId = request.id;
 
     if (hasZodFastifySchemaValidationErrors(error)) {
@@ -87,15 +103,12 @@ export function registerErrorHandler(app: FastifyInstance): void {
         type: error.type,
         title: error.title,
         status: error.statusCode,
-        detail: error.expose ? error.message : undefined,
+        ...(error.expose ? { detail: error.message } : {}),
         instance: request.url,
         requestId,
       };
       request.log.warn({ err: error, requestId }, "application error");
-      return reply
-        .status(error.statusCode)
-        .type("application/problem+json")
-        .send(body);
+      return reply.status(error.statusCode).type("application/problem+json").send(body);
     }
 
     // Fastify's own HTTP errors (e.g. rate limit 429, 404) carry a statusCode.
@@ -109,10 +122,7 @@ export function registerErrorHandler(app: FastifyInstance): void {
         instance: request.url,
         requestId,
       };
-      return reply
-        .status(statusCode)
-        .type("application/problem+json")
-        .send(body);
+      return reply.status(statusCode).type("application/problem+json").send(body);
     }
 
     request.log.error({ err: error, requestId }, "unhandled server error");
