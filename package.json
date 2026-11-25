@@ -1,6 +1,6 @@
 {
   "name": "@aircloud/template-backend-typescript",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Production-grade Fastify v5 HTTP microservice template (Node 22, TypeScript strict, OpenTelemetry, OpenAPI 3.1).",
   "type": "module",
   "license": "Apache-2.0",
@@ -23,7 +23,9 @@
   "exports": {
     ".": "./dist/server.js"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsup",
