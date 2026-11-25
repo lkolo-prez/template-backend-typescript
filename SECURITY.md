@@ -1,6 +1,6 @@
 # Security Policy
 
-We take the security of AirCloud software seriously. Thank you for helping keep
+We take the security of AIRCLOUD software seriously. Thank you for helping keep
 our users and infrastructure safe.
 
 ## Supported versions
@@ -22,8 +22,7 @@ Use **private vulnerability reporting** instead:
 
 1. Preferred: GitHub → this repo → **Security** tab → **Report a vulnerability**
    (GitHub Private Vulnerability Reporting). This creates a private advisory.
-2. Alternatively, email **security@aircloud.com.pl**. Encrypt sensitive details
-   with our PGP key referenced in `security.txt` (see below).
+2. Alternatively, email **office@aircloud.com.pl**.
 
 Please include: affected version/commit, a description, reproduction steps or a
 proof of concept, and any suggested remediation.
